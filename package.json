@@ -1,0 +1,13 @@
+{
+  "name": "foz-finance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:remote": "wrangler d1 execute foz-finance --remote --file=./schema.sql",
+    "db:local": "wrangler d1 execute foz-finance --local --file=./schema.sql"
+  },
+  "devDependencies": {"wrangler":"^4.0.0"}
+}
