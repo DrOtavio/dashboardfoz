@@ -9,6 +9,6 @@
     "run_worker_first": true
   },
   "d1_databases": [
-    {"binding":"DB","database_name":"foz-finance","database_id":"COLOQUE_AQUI_ID_DO_D1"}
+    {"binding":"DB","database_name":"foz-finance","database_id":"a183a9ce-2cac-4db9-a326-83c1acda8edc"}
   ]
 }
