@@ -2,15 +2,22 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1222"><meta name="description" content="FOZ Finance — controle de contas e rateio familiar">
-<title>FOZ Finance · Painel financeiro</title>
+<meta name="theme-color" content="#071d17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FinancePY"><meta name="description" content="FinancePY — controle de contas e rateio familiar">
+<title>FinancePY · Painel financeiro</title>
+<link rel="manifest" href="/manifest.webmanifest?v=3">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png?v=3">
 <link rel="stylesheet" href="/app.css">
 </head>
 <body>
 <div id="authScreen" class="auth-screen">
   <form id="loginForm" class="auth-card">
-    <div class="auth-symbol">F<span>↗</span></div>
-    <div class="auth-eyebrow">CONTROLE FINANCEIRO PARTICULAR</div>
+    <img class="auth-brand-logo" src="/brand/financepy-logo.png?v=3" alt="Logo FinancePY" width="166" height="166">
+    <div class="auth-eyebrow">FINANCEPY · CONTROLE FINANCEIRO PARTICULAR</div>
     <h1>Seu dinheiro,<br><em>sob controle.</em></h1>
     <p>Acesse seu painel para organizar as contas do mês.</p>
     <label class="field-label" for="accessPin">Senha de acesso</label>
@@ -21,7 +28,7 @@
 </div>
 <div id="appShell" class="app-shell hidden">
   <aside class="sidebar">
-    <div class="brand"><div class="brand-icon">F<span>↗</span></div><div><b>FOZ Finance</b><small>Gestão pessoal</small></div></div>
+    <div class="brand"><img class="brand-logo" src="/brand/financepy-logo.png?v=3" alt="" width="47" height="47"><div><b>FinancePY</b><small>Gestão pessoal</small></div></div>
     <div class="nav-caption">NAVEGAÇÃO</div>
     <nav class="side-nav">
       <button data-view="dashboard" class="nav-link is-active"><span class="nav-ico">▦</span> Visão geral</button>
@@ -32,9 +39,9 @@
     <div class="sidebar-bottom"><div class="sync-line"><span id="syncDot" class="sync-dot"></span><span id="syncLabel">Conectando…</span></div><button id="logoutBtn" class="logout-btn">↪ Sair</button></div>
   </aside>
   <main class="main">
-    <div class="topbar"><div class="breadcrumb">Painel <span>/</span> <b id="crumb">Visão geral</b></div><div class="topright"><span class="circle-avatar">O</span><span>Otávio & Giu</span></div></div>
+    <div class="topbar"><div class="breadcrumb"><img src="/brand/financepy-logo.png?v=3" class="topbar-logo" alt="" width="28" height="28">FinancePY <span>/</span> <b id="crumb">Visão geral</b></div><div class="topright"><span class="circle-avatar">O</span><span>Otávio & Giu</span></div></div>
     <div class="main-content">
-      <div class="page-heading"><div><span class="section-eyebrow">MINHAS FINANÇAS</span><h1 id="pageTitle">Visão geral</h1><p id="pageSubtitle">As contas da casa em um só lugar.</p></div><button id="addItemTop" class="primary-btn">＋ Nova despesa</button></div>
+      <div class="page-heading"><div class="heading-brand"><img class="home-logo" src="/brand/financepy-logo.png?v=3" alt="FinancePY" width="82" height="82"><div><span class="section-eyebrow">MINHAS FINANÇAS</span><h1 id="pageTitle">Visão geral</h1><p id="pageSubtitle">As contas da casa em um só lugar.</p></div></div><button id="addItemTop" class="primary-btn">＋ Nova despesa</button></div>
       <div class="period-bar"><div class="month-nav"><button class="icon-btn" id="prevMonth" title="Mês anterior">‹</button><button id="monthPickerBtn" class="current-month"><span id="displayMonth">Outubro de 2026</span><span>⌄</span></button><button class="icon-btn" id="nextMonth" title="Próximo mês">›</button></div><div class="period-actions"><button id="createMonthBtn" class="soft-btn">＋ Criar mês</button><span id="monthIndicator" class="small-pill">13 despesas</span></div></div>
       <section id="dashboardView" class="view">
         <div class="kpis"><div class="kpi kpi-main"><div class="kpi-top"><span>Despesa total</span><span class="kpi-symbol">◈</span></div><div class="kpi-value" id="kpiTotal">R$ 0,00</div><div class="kpi-desc">Valor previsto para o mês</div><div class="kpi-decoration"></div></div><div class="kpi"><div class="kpi-top"><span>Valor pago</span><span class="kpi-ico green">✓</span></div><div class="kpi-value" id="kpiPaid">R$ 0,00</div><div class="kpi-desc" id="kpiPaidDesc">Pagamentos confirmados</div></div><div class="kpi"><div class="kpi-top"><span>Em aberto</span><span class="kpi-ico amber">◷</span></div><div class="kpi-value" id="kpiPending">R$ 0,00</div><div class="kpi-desc" id="kpiPendingDesc">Valores ainda pendentes</div></div><div class="kpi"><div class="kpi-top"><span>Próximo vencimento</span><span class="kpi-ico blue">▣</span></div><div class="kpi-value" id="kpiNext">—</div><div class="kpi-desc" id="kpiNextDesc">Nenhum vencimento pendente</div></div></div>
