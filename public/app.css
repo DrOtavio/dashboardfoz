@@ -214,3 +214,9 @@ input::placeholder {color:#7b9c87}
 @media(prefers-reduced-motion:reduce){
  .mini-chart .bar,.couple-panel .progress-fill {transition:none!important;transform:none!important}
 }
+
+/* Separação editorial entre despesas compartilhadas, exclusivas do Otávio e da Giu.
+   Linha discreta atravessando a tabela inteira, sem legenda ou nova coluna. */
+.account-table tbody tr.payer-separator > td {
+  border-top: 2px solid rgba(133, 177, 146, .46);
+}
