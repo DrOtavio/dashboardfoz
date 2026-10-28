@@ -47,8 +47,45 @@ function nearestPending(rows){const pending=rows.filter(r=>r.day>0&&((r.otavio>0
 function renderDashboard(){const rows=getRows(),m=getMetric(rows);$('kpiTotal').textContent=money(m.total);$('kpiPaid').textContent=money(m.paid);$('kpiPending').textContent=money(m.pending);$('kpiPaidDesc').textContent=m.total?`${Math.min(100,Math.round(100*m.paid/m.total))}% do total previsto`:'Nenhum pagamento';$('kpiPendingDesc').textContent=`${rows.filter(r=>['pendente','atrasado'].includes(r.statusOtavio)&&r.otavio||['pendente','atrasado'].includes(r.statusGiu)&&r.giu).length} conta(s) com pendências`;
  const next=nearestPending(rows);$('kpiNext').textContent=next?`Dia ${String(next.day).padStart(2,'0')}`:'—';$('kpiNextDesc').textContent=next?next.name:'Nenhum vencimento pendente';
  $('otTotal').textContent=money(m.ot);$('giuTotal').textContent=money(m.gi);$('otPaid').textContent=`Pago: ${money(m.paidOt)}`;$('giuPaid').textContent=`Pago: ${money(m.paidGi)}`;const mx=Math.max(m.ot,m.gi,1);$('otBar').style.width=`${100*m.ot/mx}%`;$('giuBar').style.width=`${100*m.gi/mx}%`;$('splitWarning').textContent=m.warnings?`${m.warnings} rateio(s) do Excel têm divergência histórica. Clique em Editar para corrigir.`:'Divisão atualizada automaticamente conforme os valores de cada pessoa.';
- const y=Number(currentMonth.slice(0,4)),month=Number(currentMonth.slice(5)),last=[];for(let off=5;off>=0;off--){const d=new Date(y,month-1-off,15);const key=dateKey(d.getFullYear(),d.getMonth()+1);last.push({key,name:moShort[d.getMonth()],sum:getMetric(getRows(key)).total})}const max=Math.max(1,...last.map(i=>i.sum));$('miniChart').innerHTML=last.map(i=>`<div class="bar-column" title="${esc(dateLabel(i.key))}: ${money(i.sum)}"><span class="bar-value">${i.sum?WHOLE_BRL.format(i.sum):'—'}</span><div class="bar-box"><div class="bar ${i.key===currentMonth?'current':''}" style="height:${Math.round(100*i.sum/max)}%"></div></div><span class="bar-month">${i.name}</span></div>`).join('');
+ const y=Number(currentMonth.slice(0,4)),month=Number(currentMonth.slice(5)),last=[];for(let off=5;off>=0;off--){const d=new Date(y,month-1-off,15);const key=dateKey(d.getFullYear(),d.getMonth()+1);last.push({key,name:moShort[d.getMonth()],sum:getMetric(getRows(key)).total})}renderMonthlyChart(last);
  const visible=[...rows].sort(sortDue);$('dashboardRows').innerHTML=visible.length?tableHtml(visible):emptyHtml();$('dashboardCount').textContent=`${visible.length} ${visible.length===1?'despesa':'despesas'}`;$('dashboardFooter').innerHTML=visible.length?`<span class="footer-count">Exibindo todas as ${visible.length} despesas deste mês</span><div class="footer-totals"><div class="footer-total-row"><span>Total</span><strong>${money(m.total)}</strong></div><div class="footer-total-row"><span>Otávio</span><strong>${money(m.ot)}</strong></div><div class="footer-total-row"><span>Giu</span><strong>${money(m.gi)}</strong></div></div>`:'';
+}
+// CSP-safe chart: style attributes interpolated into innerHTML are blocked by
+// the Worker's `style-src 'self'` policy. CSSOM assignments below are permitted.
+// Keep the existing chart nodes for live, smoothly interpolated value changes.
+function renderMonthlyChart(months){
+ const chart=$('miniChart');
+ const same=chart.children.length===months.length && months.every((m,i)=>chart.children[i]?.dataset.month===m.key);
+ if(!same){
+  chart.innerHTML=months.map(m=>`<div class="bar-column" data-month="${m.key}"><span class="bar-value"></span><div class="bar-box"><div class="bar" role="img"></div></div><span class="bar-month">${m.name}</span></div>`).join('');
+ }
+ const highest=Math.max(0,...months.map(m=>m.sum));
+ months.forEach((m,i)=>{
+  const column=chart.children[i];
+  const bar=column.querySelector('.bar');
+  // px instead of %: absolute chart height works identically in Safari/iOS.
+  const height=highest && m.sum>0 ? Math.max(4,Math.round(145*m.sum/highest)) : 0;
+  bar.style.height=`${height}px`;
+  bar.classList.toggle('current',m.key===currentMonth);
+  bar.setAttribute('aria-label',`${dateLabel(m.key)}: ${money(m.sum)}`);
+  column.querySelector('.bar-value').textContent=m.sum?WHOLE_BRL.format(m.sum):'—';
+  column.title=`${dateLabel(m.key)}: ${money(m.sum)}`;
+ });
+}
+function setupChartAnimations(){
+ const elements=document.querySelectorAll('.chart-panel, .couple-panel');
+ // First visibility triggers one animation per panel per page load; future
+ // month/amount edits only animate the new heights and widths.
+ if(!('IntersectionObserver' in window)){
+  elements.forEach(e=>e.classList.add('chart-revealed'));
+  return;
+ }
+ const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   if(entry.isIntersecting){entry.target.classList.add('chart-revealed');observer.unobserve(entry.target)}
+  });
+ },{threshold:0.18});
+ elements.forEach(e=>observer.observe(e));
 }
 function sortDue(a,b){return(a.day||32)-(b.day||32)||a.name.localeCompare(b.name,'pt-BR')}
 function statusSelect(r,person){const key=person==='otavio'?'statusOtavio':'statusGiu';const amount=r[person];return `<select aria-label="Situação ${person} para ${esc(r.name)}" data-status-person="${person}" data-id="${esc(r.id)}" class="status-select ${esc(amount? r[key]:'isento')}" ${amount<=0?'disabled':''}>${Object.keys(statusLabels).filter(s=>s!=='isento'||amount<=0).map(s=>`<option ${r[key]===s||s==='isento'&&amount<=0?'selected':''} value="${s}">${statusLabels[s]}</option>`).join('')}</select>`}
@@ -81,6 +118,7 @@ async function logIn(evt){evt.preventDefault();const pin=$('accessPin').value;$(
  try{const response=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({pin})});if(!response.ok){const j=await response.json().catch(()=>({}));throw Error(j.error||'Senha incorreta.')}await loadRemote();$('accessPin').value=''}catch(err){$('loginError').textContent=err.message||'Não foi possível entrar.'}}
 async function logout(){if(!DEMO)await fetch('/api/logout',{method:'POST',credentials:'same-origin'}).catch(()=>{});sessionStorage.removeItem('foz-demo-auth');showLogin()}
 function setup(){
+ setupChartAnimations();
  $('loginForm').addEventListener('submit',logIn);$('logoutBtn').addEventListener('click',logout);
  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
  $('addItemTop').addEventListener('click',()=>openItem());$('prevMonth').addEventListener('click',()=>shiftMonth(-1));$('nextMonth').addEventListener('click',()=>shiftMonth(1));$('monthPickerBtn').addEventListener('click',openMonthModal);$('createMonthBtn').addEventListener('click',openMonthModal);
